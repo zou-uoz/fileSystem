@@ -1,0 +1,37 @@
+main {
+  margin: 40px 20px;
+}
+video, img {
+  padding: 10px;
+  margin: 10px;
+  width: 200px;
+  vertical-align: middle;
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  line-height: 40px;
+  text-indent: 20px;
+  background-color: white;
+  box-shadow: 0 2px 2px 1px rgba(0, 0, 0, 0.2);
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  line-height: 40px;
+  text-indent: 20px;
+  background-color: white;
+  box-shadow: 0 -2px 2px 1px rgba(0, 0, 0, 0.2);
+}
+
+.breadItem {
+  background-color: white;
+  border: none;
+  cursor: pointer;
+}
