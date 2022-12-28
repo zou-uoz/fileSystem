@@ -22,7 +22,6 @@ function App() {
       .then(result => {
         setDirents(result.dirents)
       })
-      .catch(err => console.error(err))
   }, [])
 
 
@@ -113,7 +112,6 @@ function App() {
             .then(() => {
               fetchDirents(currentFolder.match(/http:\/\/localhost:5000(.*)/)[1])
             })
-            .catch(err => console.error(err))
           return
         }
   
@@ -145,7 +143,6 @@ function App() {
             fetchDirents(currentFolder.match(/http:\/\/localhost:5000(.*)/)[1])
             setSelected(json.selected)
           })
-          .catch(err => console.error(err))
       }
     }
 
