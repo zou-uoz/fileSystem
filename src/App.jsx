@@ -163,9 +163,6 @@ function App() {
         <figure
           key={url}
           style={{
-            display: 'inline-block',
-            verticalAlign: 'middle',
-            cursor: 'default',
             backgroundColor: selected.includes(url) ? '#cce8ff' : 'revert',
             opacity: operate === 'cut' && selected.includes(url) ? '0.5' : '1',
           }}
@@ -182,9 +179,6 @@ function App() {
       return (
         <figure
           style={{
-            display: 'inline-block',
-            verticalAlign: 'middle',
-            cursor: 'default',
             backgroundColor: selected.includes(url) ? '#cce8ff' : 'revert',
             opacity: operate === 'cut' && selected.includes(url) ? '0.5' : '1',
           }}
@@ -199,9 +193,6 @@ function App() {
       return (
         <figure
           style={{
-            display: 'inline-block',
-            verticalAlign: 'middle',
-            cursor: 'default',
             backgroundColor: selected.includes(url) ? '#cce8ff' : 'revert',
             opacity: operate === 'cut' && selected.includes(url) ? '0.5' : '1',
           }}
@@ -223,7 +214,7 @@ function App() {
       <main onClick={onClick}>
         {renderChildren}
       </main>
-      <footer>底部工具栏{selected.join('、')}</footer>
+      <footer>底部工具栏</footer>
     </div>
   )
 }

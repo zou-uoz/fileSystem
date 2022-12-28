@@ -1,11 +1,25 @@
 main {
   margin: 40px 20px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
 }
-video, img {
-  padding: 10px;
-  margin: 10px;
-  width: 200px;
+
+main figure {
+  display: inline-block;
   vertical-align: middle;
+  cursor: default;
+  padding: 30px;
+  margin: 0;
+}
+
+video, img {
+  width: 100%;
+}
+
+figcaption {
+  width: 100%;
+  word-break: break-all;
 }
 
 header {
