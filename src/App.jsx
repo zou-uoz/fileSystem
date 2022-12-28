@@ -141,8 +141,9 @@ function App() {
           })
         })
           .then(res => res.json())
-          .then(() => {
+          .then((json) => {
             fetchDirents(currentFolder.match(/http:\/\/localhost:5000(.*)/)[1])
+            setSelected(json.selected)
           })
           .catch(err => console.error(err))
       }
