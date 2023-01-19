@@ -3,6 +3,8 @@ import './App.css'
 
 function App() {
   const [operate, setOperate] = useState('')
+  const [renameUrl, setRenameUrl] = useState('')
+  const [newName, setNewName] = useState('')
   const [dirents, setDirents] = useState([])
   const [clipboard, setClipboard] = useState([])
   const [selected, setSelected] = useState([])
@@ -20,6 +22,10 @@ function App() {
     })
       .then(res => res.json())
       .then(result => {
+        if (result.code !== 0) {
+          alert(result.msg)
+          return
+        }
         setDirents(result.dirents)
       })
   }, [])
@@ -84,6 +90,17 @@ function App() {
       return
     }
 
+    if (selected.includes(url) && selected.length === 1) {
+      setRenameUrl(url)
+      setNewName(url.split('/').pop())
+      setTimeout(() => {
+        const inputElem = document.querySelector('input')
+        inputElem.focus()
+        inputElem.select()
+      })
+      return
+    }
+
     if (!selected.includes(url) || selected.length > 1) {
       setSelected([url])
     }
@@ -97,7 +114,22 @@ function App() {
 
   useEffect(() => {
     const onKeyDown = event => {
+      if (renameUrl) {
+        return
+      }
+
       if (selected.length > 0) {
+        if (selected.length === 1 && event.key === 'F2') {
+          setRenameUrl(selected[0])
+          setNewName(selected[0].split('/').pop())
+          setTimeout(() => {
+            const inputElem = document.querySelector('input')
+            inputElem.focus()
+            inputElem.select()
+          })
+          return
+        }
+
         if (event.key === 'Delete') {
           fetch(`/api/remove`, {
             method: 'POST',
@@ -109,12 +141,16 @@ function App() {
             })
           })
             .then(res => res.json())
-            .then(() => {
+            .then((result) => {
+              if (result.code !== 0) {
+                alert(result.msg)
+                return
+              }
               fetchDirents(currentFolder.match(/http:\/\/localhost:5000(.*)/)[1])
             })
           return
         }
-  
+
         if (event.code === 'KeyX' && (event.ctrlKey || event.metaKey)) {
           setOperate('cut')
           setClipboard([...selected])
@@ -139,7 +175,11 @@ function App() {
           })
         })
           .then(res => res.json())
-          .then((json) => {
+          .then((result) => {
+            if (result.code !== 0) {
+              alert(result.msg)
+              return
+            }
             fetchDirents(currentFolder.match(/http:\/\/localhost:5000(.*)/)[1])
             setSelected(json.selected)
           })
@@ -153,8 +193,73 @@ function App() {
   }, [selected, currentFolder, operate, clipboard, fetchDirents])
 
   const onDoubleClickFolder = url => {
+    if (renameUrl) {
+      return
+    }
     setCurrentFolder(url)
     setSelected([])
+  }
+
+  const newFolder = () => {
+    fetch(`/api/newFolder`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({
+        targetFolder: currentFolder.match(/http:\/\/localhost:5000(.*)/)[1],
+      })
+    })
+      .then(res => res.json())
+      .then((result) => {
+        if (result.code !== 0) {
+          alert(result.msg)
+          return
+        }
+        fetchDirents(currentFolder.match(/http:\/\/localhost:5000(.*)/)[1])
+      })
+  }
+
+  const handleChange = (event) => {
+    setNewName(event.target.value)
+  }
+
+  const onBlur = (event) => {
+    fetch(`/api/rename`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({
+        oldName: renameUrl.match(/http:\/\/localhost:5000(.*)/)[1],
+        newName: currentFolder.match(/http:\/\/localhost:5000(.*)/)[1] + '/' + event.target.value,
+      })
+    })
+      .then(res => res.json())
+      .then((result) => {
+        setRenameUrl('')
+        if (result.code !== 0) {
+          alert(result.msg)
+          return
+        }
+        fetchDirents(currentFolder.match(/http:\/\/localhost:5000(.*)/)[1])
+      })
+  }
+
+  const handleClickInput = (event) => {
+    // TODO 不起作用
+    document.getSelection().removeAllRanges()
+  }
+
+  const handleKeyDownInput = (event) => {
+    if (event.key === 'Enter') {
+      event.target.blur()
+      return
+    }
+
+    if (event.key === 'Escape') {
+      setRenameUrl('')
+    }
   }
 
   const renderChildren = dirents.map(({ url, isDirectory }) => {
@@ -169,10 +274,13 @@ function App() {
           onDoubleClick={() => onDoubleClickFolder(url)}
           onClick={(event) => onClickItem(event, url)}
         >
-          <svg width={200} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
           </svg>
-          <figcaption style={{ textAlign: 'center' }}>{url.split('/').pop()}</figcaption>
+          {renameUrl === url ?
+            <input value={newName} onChange={handleChange} onBlur={onBlur} onClick={handleClickInput} onKeyDown={handleKeyDownInput} /> :
+            <figcaption style={{ textAlign: 'center' }}>{url.split('/').pop()}</figcaption>
+          }
         </figure>
       )
     } else if (url.endsWith('.mp4')) {
@@ -186,7 +294,10 @@ function App() {
           onClick={(event) => onClickItem(event, url)}
         >
           <video controls src={url} key={url} />
-          <figcaption style={{ textAlign: 'center' }}>{url.split('/').pop()}</figcaption>
+          {renameUrl === url ?
+            <input value={newName} onChange={handleChange} onBlur={onBlur} onClick={handleClickInput} onKeyDown={handleKeyDownInput} /> :
+            <figcaption style={{ textAlign: 'center' }}>{url.split('/').pop()}</figcaption>
+          }
         </figure>
       )
     } else {
@@ -200,7 +311,10 @@ function App() {
           onClick={(event) => onClickItem(event, url)}
         >
           <img src={url} alt='图片' />
-          <figcaption style={{ textAlign: 'center' }}>{url.split('/').pop()}</figcaption>
+          {renameUrl === url ?
+            <input value={newName} onChange={handleChange} onBlur={onBlur} onClick={handleClickInput} onKeyDown={handleKeyDownInput} /> :
+            <figcaption style={{ textAlign: 'center' }}>{url.split('/').pop()}</figcaption>
+          }
         </figure>
       )
     }
@@ -214,7 +328,9 @@ function App() {
       <main onClick={onClick}>
         {renderChildren}
       </main>
-      <footer>底部工具栏</footer>
+      <footer>
+        <button style={{ cursor: 'pointer' }} onClick={newFolder}>新建文件夹</button>
+      </footer>
     </div>
   )
 }
